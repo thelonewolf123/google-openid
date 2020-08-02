@@ -1,26 +1,47 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { Component } from 'react';
+import Authenticate from 'react-openidconnect';
+import OidcSettings from './oidcsettings';
+ 
+class App extends Component {
+ 
+  constructor(props) {
+    super(props);
+    this.userLoaded = this.userLoaded.bind(this); 
+    this.userUnLoaded = this.userUnLoaded.bind(this);
+ 
+    this.state = { user: undefined };
+  }  
+ 
+  userLoaded(user) {
+    if (user)
+      this.setState({ "user": user });
+      console.log(user);
+      this.parseUserData(user)
+  } 
+  
+  userUnLoaded() {
+    this.setState({ "user": undefined });
+  } 
+ 
+  NotAuthenticated() {
+    return <div>You are not authenticated, please click here to authenticate.</div>;
+  }
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+  parseUserData(user) {
+    const user_data = JSON.parse(atob(user.id_token.split('.')[1]));
+    console.log(user_data);
+    this.setState({ "user": user_data });
+    return user_data;
+  }
+  
+  
+  render() {
+      return (
+        <Authenticate OidcSettings={OidcSettings} userLoaded={this.userLoaded} userunLoaded={this.userUnLoaded} renderNotAuthenticated={this.NotAuthenticated}>
+            <div> You are authenticated. </div>
+        </Authenticate>
+      )
+  }
 }
 
 export default App;
